@@ -13,11 +13,11 @@ class GeminiLanguageService:
         Topic: "{topic}"
         Essay: "{essay_text}"
         
-        Provide the analysis strictly in JSON format with the following keys:
+        Provide the analysis strictly in JSON format with the following keys. Do not include markdown code block formatting like ```json.
         {{
             "band_score": "Overall IELTS Band score (e.g., 6.5)",
-            "grammar_errors": ["List of major grammar mistakes found and their corrections"],
-            "vocabulary_feedback": "Feedback on vocabulary usage and suggestions for higher-level synonyms",
+            "grammar_errors": ["List of 3-4 major grammar mistakes found and their corrections"],
+            "vocabulary_feedback": "Short feedback on vocabulary usage and suggestions for higher-level synonyms",
             "detailed_feedback": "General feedback on Task Achievement and Coherence"
         }}
         """
@@ -30,10 +30,10 @@ class GeminiLanguageService:
                 )
             )
             return json.loads(response.text.strip())
-        except Exception:
+        except Exception as e:
             return {
                 "band_score": "Nomalum",
-                "grammar_errors": ["Xatolik yuz berdi"],
+                "grammar_errors": [f"Xatolik yuz berdi: {str(e)}"],
                 "vocabulary_feedback": "Qayta urining",
                 "detailed_feedback": "Xato"
             }

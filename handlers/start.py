@@ -5,7 +5,7 @@ from database.connection import db
 from keyboards.inline import get_sub_keyboard, get_app_keyboard
 
 start_router = Router()
-CHANNEL_ID = "@ENGLISH_MASTER_JASUR"
+CHANNEL_ID = "@your_channel_username"
 
 async def is_user_subscribed(bot: Bot, user_id: int) -> bool:
     try:
@@ -42,7 +42,7 @@ async def command_start_handler(message: Message, bot: Bot):
 
 @start_router.callback_query(lambda c: c.data == "check_subscription")
 async def check_sub_callback(callback: CallbackQuery, bot: Bot):
-    subscribed = await is_user_subscribed(bot, callback.from_user.id)
+    subscribed = await is_user_subscribed(callback.bot, callback.from_user.id)
     if subscribed:
         await callback.message.edit_text(
             "Obuna tasdiqlandi! Quyidagi tugma orqali ilovani ochishingiz mumkin:",

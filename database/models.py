@@ -19,8 +19,8 @@ async def create_tables():
     CREATE TABLE IF NOT EXISTS user_progress (
         id SERIAL PRIMARY KEY,
         user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
-        vocabulary_score REAL DEFAULT 0.0,
         grammar_score REAL DEFAULT 0.0,
+        vocabulary_score REAL DEFAULT 0.0,
         reading_score REAL DEFAULT 0.0,
         listening_score REAL DEFAULT 0.0,
         writing_score REAL DEFAULT 0.0,
