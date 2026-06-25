@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Master Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 15px;
+            margin: 0;
+        }
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-skip { background-color: #e74c3c; color: #ffffff; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .coin-badge { background: #f1c40f; color: #000; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div id="placement-screen" class="card">
+            <h2>Placement Test 🎯</h2>
+            <p id="question-text">Savol yuklanmoqda...</p>
+            <div id="options-container"></div>
+            <button class="btn btn-skip" onclick="skipQuestion()">⏩ O'tkazib yuborish</button>
+        </div>
+
+        <div id="main-menu" class="card" style="display: none;">
+            <h2>Dashboard 🚀</h2>
+            <p>Darajangiz: <span id="lbl-level">A1</span> | Maqsad: <span id="lbl-target">C1</span></p>
+            <p>💰 Ballaringiz (Coins): <span id="lbl-coins" class="coin-badge">0</span></p>
+            <hr>
+            <div class="grid">
+                <button class="btn" onclick="submitTestResult('grammar', 80)">✍️ Grammar Test (Namuna 80%)</button>
+                <button class="btn" onclick="loadVocabulary()">📚 Vocabulary</button>
+                <button class="btn" onclick="openModule('Reading')">📖 Reading</button>
+                <button class="btn" onclick="openModule('Listening')">🎧 Listening</button>
+                <button class="btn" onclick="openModule('Writing')">📝 Writing (AI)</button>
+                <button class="btn" onclick="openModule('Speaking')">🗣️ Speaking (AI)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const userId = tg.initDataUnsafe.user?.id || 123456; 
+
+        let currentIndex = 0;
+        let weakSections = [];
+        const placementQuestions = [
+            { id: 1, section: 'Grammar', q: "She ___ English fluently.", a: "speak", b: "speaks", correct: "B" }
+        ];
+
+        function renderQuestion() {
+            if (currentIndex >= placementQuestions.length) {
+                completePlacement();
+                return;
+            }
+            const currentQ = placementQuestions[currentIndex];
+            document.getElementById("question-text").innerText = currentQ.q;
+            document.getElementById("options-container").innerHTML = `
+                <button class="btn" onclick="handleAnswer('A')">${currentQ.a}</button>
+                <button class="btn" onclick="handleAnswer('B')">${currentQ.b}</button>
+            `;
+        }
+
+        function handleAnswer(selected) {
+            if (selected !== placementQuestions[currentIndex].correct) {
+                weakSections.push(placementQuestions[currentIndex].section);
+            }
+            currentIndex++;
+            renderQuestion();
+        }
+
+        function skipQuestion() {
+            weakSections.push(placementQuestions[currentIndex].section);
+            currentIndex++;
+            renderQuestion();
+        }
+
+        async function updateUI() {
+            const res = await fetch(`/api/profile?user_id=${userId}`);
+            const data = await res.json();
+            if(!data.error) {
+                document.getElementById("lbl-level").innerText = data.current_level;
+                document.getElementById("lbl-target").innerText = data.target_score;
+                document.getElementById("lbl-coins").innerText = data.coins;
+            }
+        }
+
+        async function completePlacement() {
+            document.getElementById("placement-screen").style.display = "none";
+            document.getElementById("main-menu").style.display = "block";
+            await updateUI();
+        }
+
+        async function submitTestResult(sectionName, scorePercent) {
+            const response = await fetch('/api/progress', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, section: sectionName, score: scorePercent })
+            });
+            const result = await response.json();
+            alert(`Test saqlandi! Siz ${result.earned_coins} ball qo'lga kiritdingiz.`);
+            await updateUI();
+        }
+
+        async function loadVocabulary() {
+            const res = await fetch('/api/vocabulary?level=A1');
+            const words = await res.json();
+            alert(`Yuklangan birinchi so'z: ${words[0].word}`);
+        }
+
+        function openModule(m) { alert(`${m} moduli.`); }
+
+        renderQuestion();
+    </script>
+</body>
+</html>

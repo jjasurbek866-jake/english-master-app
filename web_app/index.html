@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Master Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-glow: #6366f1;
+            --accent-success: #10b981;
+            --accent-warn: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            padding: 16px;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Chiroyli va Silliq Animatsiyalar */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.4); }
+        }
+
+        .animated-card {
+            animation: fadeIn 0.5s ease-out forwards;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, var(--text-muted));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Dashboard qismi */
+        .status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .coin-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Modullar Setkasi (Grid) */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .btn-module {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            padding: 20px 10px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-module:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--accent-glow);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Test Oynasi Dizayni */
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            width: 100%;
+            padding: 14px;
+            text-align: left;
+            border-radius: 12px;
+            margin-top: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            padding-left: 20px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent-glow);
+            color: white;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .btn-skip {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-muted);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-glow);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <div id="placement-screen" class="animated-card">
+            <h2>Sizning darajangiz aniqlanmoqda 🎯</h2>
+            <div class="progress-bar"><div id="placement-progress" class="progress-fill"></div></div>
+            <p id="placement-question-text" style="font-size: 17px; line-height: 1.5;"></p>
+            <div id="placement-options"></div>
+            <button class="btn-action btn-skip" onclick="skipPlacement()">O'tkazib yuborish ⏩</button>
+        </div>
+
+        <div id="main-menu" class="animated-card" style="display: none;">
+            <h2>English Master Dashboard 🚀</h2>
+            <div class="status-container">
+                <div>Daraja: <span id="lbl-level" style="color: var(--accent-glow); font-weight:bold;">A1</span> | Maqsad: <span id="lbl-target">C1</span></div>
+                <div class="coin-badge">🪙 <span id="lbl-coins">0</span></div>
+            </div>
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+            
+            <div class="grid">
+                <button class="btn-module" onclick="startModule('grammar')"><span>✍️</span> Grammar</button>
+                <button class="btn-module" onclick="startModule('vocabulary')"><span>📚</span> Vocabulary</button>
+                <button class="btn-module" onclick="startModule('reading')"><span>📖</span> Reading</button>
+                <button class="btn-module" onclick="startModule('listening')"><span>🎧</span> Listening</button>
+                <button class="btn-module" onclick="startModule('writing')"><span>📝</span> Writing (AI)</button>
+                <button class="btn-module" onclick="startModule('speaking')"><span>🗣️</span> Speaking (AI)</button>
+            </div>
+        </div>
+
+        <div id="test-screen" class="animated-card" style="display: none;">
+            <h2 id="test-title">Modul Testi</h2>
+            <div class="progress-bar"><div id="test-progress" class="progress-fill"></div></div>
+            <p id="test-question-text" style="font-size: 17px; line-height: 1.5;"></p>
+            <div id="test-options"></div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const userId = tg.initDataUnsafe.user?.id || 123456;
+
+        let currentPlacementIndex = 0;
+        let activeModule = '';
+        let currentModuleQuestionIndex = 0;
+        let moduleCorrectAnswers = 0;
+
+        // Barcha fanlardan 10 tadan professional savollar banki
+        const database = {
+            placement: [
+                { q: "Choose the correct: 'He ___ a tech student.'", a: "am", b: "is", c: "are", d: "be", correct: "b" },
+                { q: "Yesterday, I ___ a new code architecture.", a: "write", b: "wrote", c: "written", d: "writes", correct: "b" }
+            ],
+            grammar: [
+                { q: "If I ___ more time, I would learn Python deeply.", a: "have", b: "had", c: "have had", d: "would have", correct: "b" },
+                { q: "By next year, Jasurbek ___ his lyceum.", a: "will finish", b: "will have finished", c: "finishes", d: "is finishing", correct: "b" },
+                { q: "She is keen ___ building scalable backend systems.", a: "on", b: "in", c: "at", d: "with", correct: "a" },
+                { q: "The database ___ optimized by the backend team yesterday.", a: "is", b: "was", c: "were", d: "has been", correct: "b" },
+                { q: "Hardly ___ entered the room when the alarm rang.", a: "I had", b: "had I", c: "I have", d: "did I", correct: "b" },
+                { q: "I look forward to ___ my professional certificate.", a: "get", b: "getting", c: "got", d: "be getting", correct: "b" },
+                { q: "They enjoyed ___ the Telegram clone project.", a: "to build", b: "building", c: "build", d: "built", correct: "b" },
+                { q: "You ___ buy a ticket; the event is completely free.", a: "mustn't", b: "don't have to", c: "shouldn't", d: "can't", correct: "b" },
+                { q: "He asked me where ___ during the weekend.", a: "did I go", b: "I had gone", c: "had I gone", d: "I go", correct: "b" },
+                { q: "Wish you ___ here with us right now.", a: "are", b: "were", c: "been", d: "would be", correct: "b" }
+            ],
+            vocabulary: [
+                { q: "What is the synonym of 'Meticulous'?", a: "Careless", b: "Careful", c: "Lazy", d: "Fast", correct: "b" },
+                { q: "What does the idiom 'Piece of cake' mean?", a: "Very difficult", b: "Very easy", c: "Sweet food", d: "A fraction", correct: "b" },
+                { q: "Select the opposite of 'Alleviate':", a: "Ease", b: "Aggravate", c: "Reduce", d: "Calm", correct: "b" },
+                { q: "A person who speaks multiple languages fluently is a ___", a: "Monolingual", b: "Polyglot", c: "Gamer", d: "Developer", correct: "b" },
+                { q: "What is the meaning of 'Redundant'?", a: "Necessary", b: "No longer needed", c: "Scarce", d: "Urgent", correct: "b" },
+                { q: "Choose the correct synonym for 'Thrive':", a: "Fail", b: "Flourish", c: "Shrink", d: "Stop", correct: "b" },
+                { q: "What does 'Feasible' mean?", a: "Impossible", b: "Practically possible", c: "Expensive", d: "Difficult", correct: "b" },
+                { q: "The term 'Scarcity' refers to ___", a: "Abundance", b: "Shortage", c: "Fear", d: "Security", correct: "b" },
+                { q: "Find the synonym of 'Inevitable':", a: "Avoidable", b: "Unavoidable", c: "Unlikely", d: "Doubtful", correct: "b" },
+                { q: "What is an 'Asset'?", a: "A liability", b: "A valuable resource", c: "A mistake", d: "A debt", correct: "b" }
+            ],
+            reading: [
+                { q: "Skimming through a document implies reading it ___", a: "slowly for detail", b: "quickly for general idea", c: "backward", d: "loudly", correct: "b" },
+                { q: "Scanning is used specifically when looking for ___", a: "the plot", b: "specific information", c: "author's mood", d: "errors", correct: "b" },
+                { q: "What does 'Implied meaning' mean?", a: "Directly stated text", b: "Suggested but not expressed directly", c: "A literal translation", d: "Dictionary definition", correct: "b" },
+                { q: "If a text is coherent, it means thoughts are ___", a: "randomly split", b: "logically connected", c: "too long", d: "poetic", correct: "b" },
+                { q: "An objective text focuses mainly on ___", a: "personal feelings", b: "facts and evidence", c: "rumors", d: "creative fiction", correct: "b" },
+                { q: "The main paragraph theme is typically found in the ___", a: "footer", b: "topic sentence", c: "last words", d: "index", correct: "b" },
+                { q: "Context clues help a reader to ___", a: "skip text", b: "guess unknown words' meaning", c: "print pages", d: "speed read", correct: "b" },
+                { q: "An informative article's main purpose is to ___", a: "entertain", b: "provide knowledge", c: "sell a product", d: "criticize", correct: "b" },
+                { q: "Paraphrasing requires rewriting a statement ___", a: "using exact words", b: "maintaining meaning with different words", c: "longer", d: "shorter", correct: "b" },
+                { q: "The tone of a scientific research paper is usually ___", a: "informal", b: "formal and neutral", c: "sarcastic", d: "emotional", correct: "b" }
+            ],
+            listening: [
+                { q: "In conversations, 'Catch you later' is an informal way to say ___", a: "I am late", b: "Goodbye", c: "Help me", d: "Hold on", correct: "b" },
+                { q: "If a speaker emphasizes a word, they want to show ___", a: "boredom", b: "importance", c: "error", d: "hesitation", correct: "b" },
+                { q: "What does a sudden drop in pitch usually indicate?", a: "Excitement", b: "Finishing a point", c: "Asking a question", d: "Shouting", correct: "b" },
+                { q: "When someone says 'I didn't quite catch that', they want you to ___", a: "run faster", b: "repeat the statement", c: "give an object", d: "be quiet", correct: "b" },
+                { q: "An active listener always ___", a: "interrupts fast", b: "pays full attention to context", c: "looks away", d: "writes notes only", correct: "b" },
+                { q: "The phrase 'By all means' implies ___", a: "No way", b: "Absolute agreement/permission", c: "Maybe", d: "Average score", correct: "b" },
+                { q: "If a speaker says 'On the other hand', they are introducing ___", a: "similar idea", b: "contrasting point", c: "conclusion", d: "greeting", correct: "b" },
+                { q: "What does 'To make a long story short' mean?", a: "Write a book", b: "Get to the point quickly", c: "Elongate a chat", d: "Lie", correct: "b" },
+                { q: "Hearing an echo on an audio line usually indicates ___", a: "good audio quality", b: "technical feedback/latency issues", c: "low volume", d: "music track", correct: "b" },
+                { q: "A speaker saying 'I'm torn between two choices' means they are ___", a: "injured", b: "undecided", c: "confident", d: "angry", correct: "b" }
+            ],
+            writing: [
+                { q: "Which linking word is best suited for adding a concluding point?", a: "Furthermore", b: "To encapsulate/In conclusion", c: "Initially", d: "For instance", correct: "b" },
+                { q: "An academic essay should strictly avoid ___", a: "complex structure", b: "informal contractions (don't, can't)", c: "passive voice", d: "references", correct: "b" },
+                { q: "Thesis statement belongs to which part of an essay?", a: "Conclusion", b: "Introduction", c: "Body 1", d: "Body 2", correct: "b" },
+                { q: "To illustrate a point in writing, you should use ___", a: "riddles", b: "concrete examples", c: "blank lines", d: "exclamations", correct: "b" },
+                { q: "Which option is a formal replacement for 'kids'?", a: "childs", b: "children", c: "guys", d: "toddler", correct: "b" },
+                { q: "What is the purpose of a topic sentence?", a: "Summarize whole essay", b: "State the main idea of that specific paragraph", c: "Hook the reader", d: "Add transition", correct: "b" },
+                { q: "Using 'However' at the start of a sentence requires a ___ right after it.", a: "period", b: "comma", c: "colon", d: "dash", correct: "b" },
+                { q: "A cohesive paragraph means that all sentences ___", a: "are very long", b: "flow smoothly and connect well", c: "start with 'And'", d: "have verbs", correct: "b" },
+                { q: "Which of the following is considered plagiarism?", a: "Paraphrasing correctly with citations", b: "Copying text directly without source reference", c: "Writing your own idea", d: "Translating your thoughts", correct: "b" },
+                { q: "What tone is expected in an IELTS Task 2 essay?", a: "Conversational", b: "Formal/Academic", c: "Humorous", d: "Accusatory", correct: "b" }
+            ],
+            speaking: [
+                { q: "To gain thinking time during a speaking exam, you can safely use ___", a: "silence for 10 seconds", b: "fillers like 'That's an interesting question...'", c: "coughing", d: "native language", correct: "b" },
+                { q: "Fluency means speaking ___", a: "extremely fast without thinking", b: "smoothly with minimal unnatural hesitation", c: "with an American accent only", d: "very loudly", correct: "b" },
+                { q: "Intonation refers to the ___ in speech.", a: "vocabulary volume", b: "rise and fall of pitch", c: "speed limit", d: "spelling accuracy", correct: "b" },
+                { q: "Pronunciation scoring evaluates if your speech is ___", a: "native-like", b: "clear and intelligible", c: "monotone", d: "fast-paced", correct: "b" },
+                { q: "If you don't understand the examiner's question, you should ___", a: "stay silent", b: "politely ask for clarification", c: "guess randomly", d: "leave", correct: "b" },
+                { q: "Idiomatic expressions should be used ___ in advanced levels.", a: "never", b: "naturally and accurately", c: "in every single sentence", d: "loudly", correct: "b" },
+                { q: "In Speaking Part 2, you are required to talk continuously for ___", a: "30 seconds", b: "1 to 2 minutes", c: "5 minutes", d: "10 minutes", correct: "b" },
+                { q: "To expand your answer well, you can use the structure ___", a: "Yes/No only", b: "Point, Reason, Example", c: "Repeating the question", d: "Silent pause", correct: "b" },
+                { q: "Coherence in speaking means your response is ___", a: "very short", b: "easy to follow and logical", c: "full of high vocabulary only", d: "loud", correct: "b" },
+                { q: "Paraphrasing the prompt question shows your ___ range.", a: "grammatical", b: "lexical resource", c: "pronunciation", d: "speed", correct: "b" }
+            ]
+        };
+
+        // Placement Test mantiqi
+        function renderPlacement() {
+            if (currentPlacementIndex >= database.placement.length) {
+                completePlacement();
+                return;
+            }
+            const progress = (currentPlacementIndex / database.placement.length) * 100;
+            document.getElementById("placement-progress").style.width = `${progress}%`;
+            
+            const qData = database.placement[currentPlacementIndex];
+            document.getElementById("placement-question-text").innerText = qData.q;
+            
+            document.getElementById("placement-options").innerHTML = `
+                <button class="option-btn" onclick="handlePlacementAnswer('a')">A) ${qData.a}</button>
+                <button class="option-btn" onclick="handlePlacementAnswer('b')">B) ${qData.b}</button>
+                <button class="option-btn" onclick="handlePlacementAnswer('c')">C) ${qData.c}</button>
+                <button class="option-btn" onclick="handlePlacementAnswer('d')">D) ${qData.d}</button>
+            `;
+        }
+
+        function handlePlacementAnswer(ans) {
+            currentPlacementIndex++;
+            renderPlacement();
+        }
+
+        function skipPlacement() {
+            completePlacement();
+        }
+
+        async function completePlacement() {
+            document.getElementById("placement-screen").style.display = "none";
+            document.getElementById("main-menu").style.display = "block";
+            await updateProfileUI();
+        }
+
+        // Profil va interfeysni yangilash
+        async function updateProfileUI() {
+            try {
+                const res = await fetch(`/api/profile?user_id=${userId}`);
+                const data = await res.json();
+                if(!data.error) {
+                    document.getElementById("lbl-level").innerText = data.current_level;
+                    document.getElementById("lbl-target").innerText = data.target_score;
+                    document.getElementById("lbl-coins").innerText = data.coins;
+                }
+            } catch(e) {
+                console.log("Mahalliy sinov rejimi faollashdi.");
+            }
+        }
+
+        // Modul Testini Boshlash
+        function startModule(moduleName) {
+            activeModule = moduleName;
+            currentModuleQuestionIndex = 0;
+            moduleCorrectAnswers = 0;
+            
+            document.getElementById("main-menu").style.display = "none";
+            document.getElementById("test-screen").style.display = "block";
+            
+            document.getElementById("test-title").innerText = `${moduleName.toUpperCase()} moduli testi 📋`;
+            renderModuleQuestion();
+        }
+
+        // Modul savollarini chiqarish
+        function renderModuleQuestion() {
+            const questionsList = database[activeModule];
+            
+            if (currentModuleQuestionIndex >= questionsList.length) {
+                finishModuleTest();
+                return;
+            }
+
+            const progress = (currentModuleQuestionIndex / questionsList.length) * 100;
+            document.getElementById("test-progress").style.width = `${progress}%`;
+
+            const qData = questionsList[currentModuleQuestionIndex];
+            document.getElementById("test-question-text").innerText = `Savol ${currentModuleQuestionIndex + 1}/10: ${qData.q}`;
+            
+            document.getElementById("test-options").innerHTML = `
+                <button class="option-btn" onclick="handleModuleAnswer('a')">A) ${qData.a}</button>
+                <button class="option-btn" onclick="handleModuleAnswer('b')">B) ${qData.b}</button>
+                <button class="option-btn" onclick="handleModuleAnswer('c')">C) ${qData.c}</button>
+                <button class="option-btn" onclick="handleModuleAnswer('d')">D) ${qData.d}</button>
+            `;
+        }
+
+        function handleModuleAnswer(selected) {
+            const currentQ = database[activeModule][currentModuleQuestionIndex];
+            if (selected === currentQ.correct) {
+                moduleCorrectAnswers++;
+            }
+            currentModuleQuestionIndex++;
+            renderModuleQuestion();
+        }
+
+        // Test tugaganda natijani bazaga yuborish va Coin qo'shish
+        async function finishModuleTest() {
+            document.getElementById("test-screen").style.display = "none";
+            document.getElementById("main-menu").style.display = "block";
+            
+            const totalQuestions = database[activeModule].length;
+            const scorePercent = (moduleCorrectAnswers / totalQuestions) * 100;
+
+            // To'g'ri javoblar sonicha Coin beriladi
+            alert(`Tabriklaymiz! 🎉 Siz 10 ta savoldan ${moduleCorrectAnswers} tasiga to'g'ri javob berdingiz va shuncha Coin yutib oldingiz!`);
+
+            try {
+                const response = await fetch('/api/progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        user_id: userId, 
+                        section: activeModule, 
+                        score: scorePercent 
+                    })
+                });
+                await updateProfileUI();
+            } catch(e) {
+                // API ulanmagan bo'lsa frontning o'zida ballni vizual yangilash (sinov uchun)
+                let currentCoins = parseInt(document.getElementById("lbl-coins").innerText);
+                document.getElementById("lbl-coins").innerText = currentCoins + moduleCorrectAnswers;
+            }
+        }
+
+        // Dasturni ishga tushirish
+        renderPlacement();
+    </script>
+</body>
+</html>
