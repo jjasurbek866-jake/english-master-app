@@ -163,6 +163,7 @@
 <body>
 
     <div id="app">
+        <!-- Placement Test Ekrani -->
         <div id="placement-screen" class="animated-card">
             <h2>Sizning darajangiz aniqlanmoqda 🎯</h2>
             <div class="progress-bar"><div id="placement-progress" class="progress-fill"></div></div>
@@ -171,6 +172,7 @@
             <button class="btn-action btn-skip" onclick="skipPlacement()">O'tkazib yuborish ⏩</button>
         </div>
 
+        <!-- Asosiy Dashboard -->
         <div id="main-menu" class="animated-card" style="display: none;">
             <h2>English Master Dashboard 🚀</h2>
             <div class="status-container">
@@ -189,6 +191,7 @@
             </div>
         </div>
 
+        <!-- Modul Test Tizimi Oynasi -->
         <div id="test-screen" class="animated-card" style="display: none;">
             <h2 id="test-title">Modul Testi</h2>
             <div class="progress-bar"><div id="test-progress" class="progress-fill"></div></div>
@@ -196,6 +199,7 @@
             <div id="test-options"></div>
         </div>
 
+        <!-- Writing AI Ekrani -->
         <div id="writing-screen" class="animated-card" style="display: none;">
             <h2>AI Writing Examiner 📝</h2>
             <p style="color: var(--accent-glow); font-weight: bold;">Mavzu (Topic):</p>
@@ -322,7 +326,9 @@
             renderPlacement();
         }
 
-        function skipPlacement() { completePlacement(); }
+        function skipPlacement() { 
+            completePlacement(); 
+        }
 
         async function completePlacement() {
             document.getElementById("placement-screen").style.display = "none";
@@ -332,14 +338,22 @@
 
         async function updateProfileUI() {
             try {
-                const res = await fetch(`/api/profile?user_id=${userId}`);
-                const data = await res.json();
-                if(!data.error) {
-                    document.getElementById("lbl-level").innerText = data.current_level;
-                    document.getElementById("lbl-target").innerText = data.target_score;
-                    document.getElementById("lbl-coins").innerText = data.coins;
+                const res = await fetch(`http://localhost:8080/api/profile?user_id=${userId}`).catch(e => {
+                    console.log("Serverga ulanib bo'lmadi, lokal rejim.");
+                    return null;
+                });
+                
+                if (res && res.ok) {
+                    const data = await res.json();
+                    if(!data.error) {
+                        document.getElementById("lbl-level").innerText = data.current_level;
+                        document.getElementById("lbl-target").innerText = data.target_score;
+                        document.getElementById("lbl-coins").innerText = data.coins;
+                    }
                 }
-            } catch(e) { console.log("Lokal rejim."); }
+            } catch(e) { 
+                console.log("Profil yuklashda xatolik."); 
+            }
         }
 
         function startModule(moduleName) {
@@ -406,7 +420,7 @@
             alert(`Test tugadi! 10 tadan ${moduleCorrectAnswers} ta to'g'ri topdingiz va +${moduleCorrectAnswers} Coin oldingiz!`);
 
             try {
-                await fetch('/api/progress', {
+                await fetch('http://localhost:8080/api/progress', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, section: activeModule, score: scorePercent })
@@ -475,6 +489,7 @@
             }
         }
 
+        // Birinchi bo'lib ekranga savollarni chiqaramiz, localhost xatosi to'g'ri ishlashni to'xtatmaydi
         renderPlacement();
     </script>
 </body>

@@ -1,14 +1,11 @@
 from aiogram import Router, html, Bot
 from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
-import os
 from database.connection import db
 from keyboards.inline import get_sub_keyboard, get_app_keyboard
+from config import CHANNEL_ID
 
 start_router = Router()
-
-# Kanal nomini to'g'ridan-to'g'ri .env faylidan olamiz
-CHANNEL_ID = os.getenv("CHANNEL_ID", "@default_channel")
 
 async def is_user_subscribed(bot: Bot, user_id: int) -> bool:
     try:
