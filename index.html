@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Master Pro</title>
-    <script src="[https://telegram.org/js/telegram-web-app.js](https://telegram.org/js/telegram-web-app.js)"></script>
+    <!-- Telegram rasmiy JS skripti (Xatoliksiz yuklanadigan to'g'ri havola) -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
@@ -47,7 +48,6 @@
             font-weight: 700;
             letter-spacing: -0.5px;
             background: linear-gradient(to right, #fff, var(--text-muted));
-            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -232,9 +232,15 @@
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        const userId = tg.initDataUnsafe.user?.id || 123456;
+        // Xavfsiz tekshiruv: agar Telegram WebApp topilmasa, o'zi 'null' qilib ketadi va script qotib qolmaydi
+        const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+        
+        if (tg) {
+            tg.expand();
+        }
+
+        // Brauzer yoki eski kesh holatida xato bermasligi uchun ixtiyoriy foydalanuvchi ID raqami
+        const userId = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user.id : 123456;
 
         let currentPlacementIndex = 0;
         let activeModule = '';
@@ -490,7 +496,7 @@
             }
         }
 
-        // Birinchi bo'lib ekranga savollarni chiqaramiz, localhost xatosi to'g'ri ishlashni to'xtatmaydi
+        // Script yuklanishi bilan xatolarsiz to'g'ridan-to'g'ri birinchi savolni chiqaradi
         renderPlacement();
     </script>
 </body>
